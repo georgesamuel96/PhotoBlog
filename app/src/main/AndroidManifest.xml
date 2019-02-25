@@ -26,7 +26,8 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-        <activity android:name=".NewItemActivity"></activity>
+        <activity android:name=".NewItemActivity" />
+        <activity android:name=".CommentsActivity"></activity>
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package com.example.georgesamuel.photoblog;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -153,6 +154,17 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
             }
         });
 
+        // Post Comment
+        myViewHolder.commentBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(context, CommentsActivity.class);
+                i.putExtra("blog_post_id", blogPostId);
+                context.startActivity(i);
+            }
+        });
+
     }
 
     @Override
@@ -165,8 +177,8 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
         TextView desc, userName, time;
         ImageView postImage;
         CircleImageView profileImage;
-        ImageView likeBtn;
-        TextView likeCount;
+        ImageView likeBtn, commentBtn;
+        TextView likeCount, commentCount;
 
         public MyViewHolder(View view){
             super(view);
@@ -176,8 +188,10 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
             time = (TextView) view.findViewById(R.id.blog_date);
             postImage = (ImageView) view.findViewById(R.id.blog_image);
             profileImage = (CircleImageView) view.findViewById(R.id.blog_user_image);
-            likeBtn = (ImageView) view.findViewById(R.id.like_btn);
-            likeCount = (TextView) view.findViewById(R.id.like_count);
+            likeBtn = (ImageView) view.findViewById(R.id.blog_like_btn);
+            likeCount = (TextView) view.findViewById(R.id.blog_like_count);
+            commentBtn = (ImageView) view.findViewById(R.id.blog_comment_icon);
+            commentCount = (TextView) view.findViewById(R.id.blog_comment_count);
         }
     }
 }

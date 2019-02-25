@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
@@ -80,29 +81,32 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
-                    if(isFirstPageFirstLoad) {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        if (isFirstPageFirstLoad) {
 
-                        lastVisible = queryDocumentSnapshots.getDocuments()
-                                .get(queryDocumentSnapshots.size() - 1);
-                    }
+                            lastVisible = queryDocumentSnapshots.getDocuments()
+                                    .get(queryDocumentSnapshots.size() - 1);
 
-                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                        if (doc.getType() == DocumentChange.Type.ADDED) {
-
-                            String blogPostId = doc.getDocument().getId();
-                            BlogPost blogPost = doc.getDocument().toObject(BlogPost.class).withId(blogPostId);
-
-                            if(isFirstPageFirstLoad) {
-                                post_list.add(blogPost);
-                            }
-                            else{
-                                post_list.add(0, blogPost);
-                            }
-
-                            adapter.notifyDataSetChanged();
+                            post_list.clear();
                         }
+
+                        for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                            if (doc.getType() == DocumentChange.Type.ADDED) {
+
+                                String blogPostId = doc.getDocument().getId();
+                                BlogPost blogPost = doc.getDocument().toObject(BlogPost.class).withId(blogPostId);
+
+                                if (isFirstPageFirstLoad) {
+                                    post_list.add(blogPost);
+                                } else {
+                                    post_list.add(0, blogPost);
+                                }
+
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
+                        isFirstPageFirstLoad = false;
                     }
-                    isFirstPageFirstLoad = false;
                 }
             });
         }
