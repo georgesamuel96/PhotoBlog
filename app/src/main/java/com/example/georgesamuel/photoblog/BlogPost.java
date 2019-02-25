@@ -1,6 +1,6 @@
 package com.example.georgesamuel.photoblog;
 
-public class BlogPost {
+public class BlogPost extends BlogPostId{
 
     private String user_id, image_url, desc;
     private Long timestamp;

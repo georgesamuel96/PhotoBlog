@@ -7,7 +7,7 @@ import com.google.firebase.firestore.Exclude;
 public class BlogPostId {
 
     @Exclude
-    private String blogPostId;
+    public String blogPostId;
 
     public <T extends BlogPostId> T withId(@NonNull final String id){
         this.blogPostId = id;
