@@ -102,7 +102,8 @@ public class NewItemActivity extends AppCompatActivity {
 
                     progressBar.setVisibility(View.VISIBLE);
 
-                    final String randomName = Long.toString(System.currentTimeMillis());
+                    final Long timeStamp = System.currentTimeMillis();
+                    final String randomName = Long.toString(timeStamp);
 
                     final StorageReference filePath = storageReference.child("post_images").child(randomName + ".jpg");
                     UploadTask uploadTask = filePath.putFile(itemImageURI);
@@ -154,7 +155,7 @@ public class NewItemActivity extends AppCompatActivity {
                                 itemMap.put("image_url", downloadUri.toString());
                                 itemMap.put("desc", desc);
                                 itemMap.put("user_id", currentUserID);
-                                itemMap.put("timestamp", randomName);
+                                itemMap.put("timestamp", timeStamp);
                                 firebaseFirestore.collection("posts").add(itemMap)
                                         .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                                             @Override

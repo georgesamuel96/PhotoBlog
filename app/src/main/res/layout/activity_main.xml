@@ -20,12 +20,30 @@
         android:id="@+id/add_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/mainBottomNav"
         android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/_12sdp"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginLeft="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:layout_marginRight="@dimen/_12sdp"
         android:src="@mipmap/icon_add"
-        app:fabSize="normal"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:fabSize="mini" />
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/mainBottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:menu="@menu/bottom_menu"
+        android:layout_alignParentBottom="true"/>
+
+    <FrameLayout
+        android:id="@+id/main_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/tool_bar"
+        android:layout_marginBottom="@dimen/_48sdp">
+
+    </FrameLayout>
 
 
 </RelativeLayout>

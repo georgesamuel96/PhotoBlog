@@ -2,7 +2,10 @@ package com.example.georgesamuel.photoblog;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -25,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private FirebaseFirestore firebaseFirestore;
     private String currentUserID;
+    private BottomNavigationView bottomNavigationView;
+    private HomeFragment homeFragment;
+    private AccountFragment accountFragment;
+    private NotificationFragment notificationFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,15 +42,43 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(R.string.app_name);
+
         fab = (FloatingActionButton) findViewById(R.id.add_item);
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.mainBottomNav);
 
         mAut = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
+
+        homeFragment = new HomeFragment();
+        notificationFragment = new NotificationFragment();
+        accountFragment = new AccountFragment();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, NewItemActivity.class));
+            }
+        });
+
+        replaceFragment(homeFragment);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
+                if(menuItem.getItemId() == R.id.bottom_action_home){
+                    replaceFragment(homeFragment);
+                    return true;
+                }
+                else if(menuItem.getItemId() == R.id.bottom_action_account){
+                    replaceFragment(accountFragment);
+                    return true;
+                }
+                else if(menuItem.getItemId() == R.id.bottom_action_notif){
+                    replaceFragment(notificationFragment);
+                    return true;
+                }
+
+                return false;
             }
         });
     }
@@ -102,5 +138,12 @@ public class MainActivity extends AppCompatActivity {
     private void sendToLogin() {
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
         finish();
+    }
+
+    private void replaceFragment(Fragment fragment){
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.main_container, fragment);
+        fragmentTransaction.commit();
     }
 }
