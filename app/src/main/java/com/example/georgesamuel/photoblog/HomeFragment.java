@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,7 +34,7 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ArrayList<BlogPost> post_list = new ArrayList<>();
-    private FirebaseFirestore firebaseFirestore;
+    private FirebaseFirestore firebaseFirestore, ff;
     private BlogPostAdapter adapter;
     private DocumentSnapshot lastVisible;
     private FirebaseAuth mAuth;
@@ -61,6 +63,7 @@ public class HomeFragment extends Fragment {
         if(mAuth.getCurrentUser() != null) {
 
             firebaseFirestore = FirebaseFirestore.getInstance();
+            ff = FirebaseFirestore.getInstance();
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -82,6 +85,7 @@ public class HomeFragment extends Fragment {
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
                     if (!queryDocumentSnapshots.isEmpty()) {
+
                         if (isFirstPageFirstLoad) {
 
                             lastVisible = queryDocumentSnapshots.getDocuments()
@@ -98,6 +102,7 @@ public class HomeFragment extends Fragment {
 
                                 if (isFirstPageFirstLoad) {
                                     post_list.add(blogPost);
+
                                 } else {
                                     post_list.add(0, blogPost);
                                 }
@@ -137,6 +142,7 @@ public class HomeFragment extends Fragment {
 
                             post_list.add(blogPost);
                             adapter.notifyDataSetChanged();
+
                         }
                     }
                 }

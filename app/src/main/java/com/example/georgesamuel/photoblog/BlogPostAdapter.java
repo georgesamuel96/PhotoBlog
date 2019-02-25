@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -35,14 +37,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyViewHolder> {
 
-    private ArrayList<BlogPost> list = new ArrayList<>();
+    private ArrayList<BlogPost> postList = new ArrayList<>();
     private Context context;
     private Long timestamp;
     private FirebaseFirestore firebaseFirestore;
     private FirebaseAuth mAuth;
 
     public BlogPostAdapter(ArrayList<BlogPost> list){
-        this.list = list;
+        this.postList = list;
     }
     @NonNull
     @Override
@@ -57,20 +59,20 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final MyViewHolder myViewHolder, int i) {
+    public void onBindViewHolder(@NonNull final MyViewHolder myViewHolder, final int i) {
 
         myViewHolder.setIsRecyclable(false);
-        final String blogPostId = list.get(i).blogPostId;
+        final String blogPostId = postList.get(i).blogPostId;
         final String currentUserId = mAuth.getCurrentUser().getUid();
-        String image_url = list.get(i).getImage_url();
-        timestamp = list.get(i).getTimestamp();
-        SimpleDateFormat sdfDateTime = new SimpleDateFormat("MMM dd, yyyy");
+        String image_url = postList.get(i).getImage_url();
+        timestamp = postList.get(i).getTimestamp();
+        SimpleDateFormat sdfDateTime = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a");
         String dateTime = sdfDateTime.format(timestamp);
-        String user_id = list.get(i).getUser_id();
+        String user_id = postList.get(i).getUser_id();
         final RequestOptions requestOptions = new RequestOptions();
         requestOptions.placeholder(R.drawable.post_placeholder);
 
-        myViewHolder.desc.setText(list.get(i).getDesc());
+        myViewHolder.desc.setText(postList.get(i).getDesc());
         Glide.with(context).applyDefaultRequestOptions(requestOptions).load(image_url).into(myViewHolder.postImage);
         myViewHolder.time.setText(dateTime);
 
@@ -92,6 +94,7 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
                 }
             }
         });
+
 
         // Check if user like this post or not
         firebaseFirestore.collection("posts").document(blogPostId).collection("Likes")
@@ -165,11 +168,32 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
             }
         });
 
+        // Delete Post
+        if(currentUserId.equals(user_id)){
+            myViewHolder.delete_btn.setVisibility(View.VISIBLE);
+            myViewHolder.delete_btn.setEnabled(true);
+        }
+        myViewHolder.delete_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                firebaseFirestore.collection("posts").document(blogPostId).delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                        postList.remove(i);
+                        notifyDataSetChanged();
+                    }
+                });
+            }
+        });
+
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return postList.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
@@ -179,6 +203,7 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
         CircleImageView profileImage;
         ImageView likeBtn, commentBtn;
         TextView likeCount, commentCount;
+        Button delete_btn;
 
         public MyViewHolder(View view){
             super(view);
@@ -192,6 +217,7 @@ public class BlogPostAdapter extends RecyclerView.Adapter<BlogPostAdapter.MyView
             likeCount = (TextView) view.findViewById(R.id.blog_like_count);
             commentBtn = (ImageView) view.findViewById(R.id.blog_comment_icon);
             commentCount = (TextView) view.findViewById(R.id.blog_comment_count);
+            delete_btn = (Button) view.findViewById(R.id.blog_delete_btn);
         }
     }
 }
