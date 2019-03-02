@@ -34,16 +34,16 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ArrayList<BlogPost> post_list = new ArrayList<>();
-    private FirebaseFirestore firebaseFirestore, ff;
+    private FirebaseFirestore firebaseFirestore;
     private BlogPostAdapter adapter;
     private DocumentSnapshot lastVisible;
     private FirebaseAuth mAuth;
     private boolean isFirstPageFirstLoad = true;
+    private SaveHomeInstance homeInstance;
 
     public HomeFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
@@ -51,19 +51,26 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.blog_list_view);
 
+        mAuth = FirebaseAuth.getInstance();
+        homeInstance = new SaveHomeInstance();
+
+        if(!homeInstance.getIsFirstLoad()) {
+
+            lastVisible = homeInstance.getDocumentSnapshot();
+            post_list = homeInstance.getList();
+        }
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.blog_list_view);
         adapter = new BlogPostAdapter(post_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
-
-        mAuth = FirebaseAuth.getInstance();
+        adapter.notifyDataSetChanged();
 
         if(mAuth.getCurrentUser() != null) {
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            ff = FirebaseFirestore.getInstance();
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -78,42 +85,49 @@ public class HomeFragment extends Fragment {
                 }
             });
 
-            Query query = firebaseFirestore.collection("posts")
-                    .orderBy("timestamp", Query.Direction.DESCENDING).limit(3);
-            query.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+            if(homeInstance.getIsFirstLoad()) {
 
-                    if (!queryDocumentSnapshots.isEmpty()) {
+                homeInstance.setIsFirstLoad(false);
 
-                        if (isFirstPageFirstLoad) {
+                Query query = firebaseFirestore.collection("posts")
+                        .orderBy("timestamp", Query.Direction.DESCENDING).limit(3);
+                query.addSnapshotListener(getActivity(), new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
-                            lastVisible = queryDocumentSnapshots.getDocuments()
-                                    .get(queryDocumentSnapshots.size() - 1);
+                        if (!queryDocumentSnapshots.isEmpty()) {
 
-                            post_list.clear();
-                        }
+                            if (isFirstPageFirstLoad) {
 
-                        for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                            if (doc.getType() == DocumentChange.Type.ADDED) {
+                                lastVisible = queryDocumentSnapshots.getDocuments()
+                                        .get(queryDocumentSnapshots.size() - 1);
+                                homeInstance.setDocumentSnapshot(lastVisible);
 
-                                String blogPostId = doc.getDocument().getId();
-                                BlogPost blogPost = doc.getDocument().toObject(BlogPost.class).withId(blogPostId);
-
-                                if (isFirstPageFirstLoad) {
-                                    post_list.add(blogPost);
-
-                                } else {
-                                    post_list.add(0, blogPost);
-                                }
-
-                                adapter.notifyDataSetChanged();
+                                post_list.clear();
                             }
+
+                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                if (doc.getType() == DocumentChange.Type.ADDED) {
+
+                                    String blogPostId = doc.getDocument().getId();
+                                    BlogPost blogPost = doc.getDocument().toObject(BlogPost.class).withId(blogPostId);
+
+                                    if (isFirstPageFirstLoad) {
+                                        post_list.add(blogPost);
+
+                                    } else {
+                                        post_list.add(0, blogPost);
+                                    }
+
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }
+                            homeInstance.setList(post_list);
+                            isFirstPageFirstLoad = false;
                         }
-                        isFirstPageFirstLoad = false;
                     }
-                }
-            });
+                });
+            }
         }
 
         return view;
@@ -133,6 +147,7 @@ public class HomeFragment extends Fragment {
                 if(!queryDocumentSnapshots.isEmpty()) {
                     lastVisible = queryDocumentSnapshots.getDocuments()
                             .get(queryDocumentSnapshots.size() - 1);
+                    homeInstance.setDocumentSnapshot(lastVisible);
 
                     for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                         if (doc.getType() == DocumentChange.Type.ADDED) {
@@ -142,12 +157,11 @@ public class HomeFragment extends Fragment {
 
                             post_list.add(blogPost);
                             adapter.notifyDataSetChanged();
-
                         }
                     }
+                    homeInstance.setList(post_list);
                 }
             }
         });
     }
-
 }

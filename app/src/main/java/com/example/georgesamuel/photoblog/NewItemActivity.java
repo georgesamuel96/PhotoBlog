@@ -53,6 +53,7 @@ public class NewItemActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String currentUserID;
     private Bitmap compressedImageFile;
+    private SaveHomeInstance homeInstance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,7 @@ public class NewItemActivity extends AppCompatActivity {
         storageReference = FirebaseStorage.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         currentUserID = mAuth.getCurrentUser().getUid();
+        homeInstance = new SaveHomeInstance();
 
         toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
@@ -164,6 +166,16 @@ public class NewItemActivity extends AppCompatActivity {
                                                 if(task.isSuccessful()){
                                                     Toast.makeText(NewItemActivity.this, "Post was added",
                                                             Toast.LENGTH_LONG).show();
+
+                                                    BlogPost post = new BlogPost();
+                                                    post.setImage_url(downloadUri.toString());
+                                                    post.setDesc(desc);
+                                                    post.setTimestamp(timeStamp);
+                                                    post.setUser_id(currentUserID);
+                                                    post.withId(task.getResult().getId());
+                                                    homeInstance.getList().add(0, post);
+                                                    System.out.println(task.getResult().getId());
+
                                                     startActivity(new Intent(NewItemActivity.this, MainActivity.class));
                                                     finish();
                                                 }
